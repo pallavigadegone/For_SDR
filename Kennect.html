@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorting Visualizer</title>
+  <style>
+    #bars-container {
+      display: flex;
+      justify-content: left;
+      align-items: flex-end;
+      padding: 20px;
+      height: 350px;
+    }
+
+    .bar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .bar {
+      width: 15px;
+      margin: 0 2px;
+      background-color: #3498db;
+      transition: height 0.5s, background-color 0.5s;
+    }
+
+    .bar-label {
+      margin-top: 5px;
+      font-size: 10px;
+    }
+
+    button {
+      margin: 1px;
+    }
+
+    h1 {
+      text-align: left;
+      background-color: rgb(161, 81, 161);
+      color: white;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Comparison Sorting Algorithms Visualizer</h1>
+
+<div>
+  <button onclick="randomizeArray()">Randomize Array</button>
+  <button onclick="insertionSort()">Insertion Sort</button>
+  <button onclick="selectionSort()">Selection Sort</button>
+  <button onclick="bubbleSort()">Bubble Sort</button>
+  <button onclick="quickSort()">Quick Sort</button>
+  <button onclick="mergeSort()">Merge Sort</button>
+  <button onclick="shellSort()">Shell Sort</button>
+  <button onclick="changeSize()">Change Size</button>
+</div>
+
+<div id="bars-container"></div>
+
+<script>
+  let bars = [];
+
+  function createBars(sizes) {
+    bars = [];
+    const container = document.getElementById('bars-container');
+    container.innerHTML = '';
+
+    sizes.forEach((size, index) => {
+      const barContainer = document.createElement('div');
+      barContainer.className = 'bar-container';
+
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.height = `${size * 3}px`;
+
+      const barLabel = document.createElement('div');
+      barLabel.className = 'bar-label';
+      barLabel.textContent = size;
+
+      barContainer.appendChild(bar);
+      barContainer.appendChild(barLabel);
+
+      container.appendChild(barContainer);
+
+      bars.push({ value: size, element: bar });
+    });
+  }
+
+  function randomizeArray() {
+    bars.sort(() => Math.random() - 0.5);
+    updateBars();
+  }
+
+  function updateBars() {
+    const container = document.getElementById('bars-container');
+    container.innerHTML = '';
+    bars.forEach(bar => {
+      const barContainer = document.createElement('div');
+      barContainer.className = 'bar-container';
+
+      const newBar = document.createElement('div');
+      newBar.className = 'bar';
+      newBar.style.height = `${bar.value * 3}px`;
+
+      const barLabel = document.createElement('div');
+      barLabel.className = 'bar-label';
+      barLabel.textContent = bar.value;
+
+      barContainer.appendChild(newBar);
+      barContainer.appendChild(barLabel);
+
+      container.appendChild(barContainer);
+
+      bar.element = newBar;
+    });
+  }
+
+  function insertionSort() {
+    let i = 1;
+
+    function insertionStep() {
+      if (i < bars.length) {
+        let j = i - 1;
+        const key = bars[i].value;
+        const currentBar = bars[i].element;
+
+        currentBar.style.backgroundColor = '#e74c3c';
+
+        while (j >= 0 && bars[j].value > key) {
+          bars[j + 1].value = bars[j].value;
+          bars[j + 1].element.style.height = `${bars[j].value * 3}px`;
+
+          setTimeout(() => {
+            updateBars();
+          }, j * 300);
+
+          j--;
+        }
+
+        bars[j + 1].value = key;
+        bars[j + 1].element.style.height = `${key * 3}px`;
+
+        setTimeout(() => {
+          currentBar.style.backgroundColor = '#3498db';
+          updateBars();
+          i++;
+          insertionStep();
+        }, i * 300);
+      }
+    }
+
+    insertionStep();
+  }
+
+  function selectionSort() {
+    let i = 0;
+
+    function selectionStep() {
+      if (i < bars.length - 1) {
+        let minIndex = i;
+
+        bars[minIndex].element.style.backgroundColor = '#e74c3c';
+
+        for (let j = i + 1; j < bars.length; j++) {
+          if (bars[j].value < bars[minIndex].value) {
+            bars[minIndex].element.style.backgroundColor = '#3498db';
+            minIndex = j;
+            bars[minIndex].element.style.backgroundColor = '#e74c3c';
+          }
+        }
+
+        const temp = bars[minIndex].value;
+        bars[minIndex].value = bars[i].value;
+        bars[i].value = temp;
+
+        setTimeout(() => {
+          updateBars();
+          bars[minIndex].element.style.backgroundColor = '#3498db';
+          i++;
+          selectionStep();
+        }, i * 300);
+      }
+    }
+
+    selectionStep();
+  }
+
+  function bubbleSort() {
+    let i = 0;
+
+    function bubbleStep() {
+      if (i < bars.length - 1) {
+        let j = 0;
+
+        function innerBubbleStep() {
+          if (j < bars.length - i - 1) {
+            bars[j].element.style.backgroundColor = '#e74c3c';
+            bars[j + 1].element.style.backgroundColor = '#e74c3c';
+
+            if (bars[j].value > bars[j + 1].value) {
+              const temp = bars[j].value;
+              bars[j].value = bars[j + 1].value;
+              bars[j + 1].value = temp;
+
+              setTimeout(() => {
+                updateBars();
+                innerBubbleStep();
+              }, i * 300);
+            } else {
+              setTimeout(() => {
+                bars[j].element.style.backgroundColor = '#3498db';
+                bars[j + 1].element.style.backgroundColor = '#3498db';
+                innerBubbleStep();
+              }, i * 300);
+            }
+
+            j++;
+          } else {
+            bars[j].element.style.backgroundColor = '#3498db';
+            bars[j + 1].element.style.backgroundColor = '#3498db';
+            i++;
+            bubbleStep();
+          }
+        }
+
+        innerBubbleStep();
+      }
+    }
+
+    bubbleStep();
+  }
+
+  function quickSort() {
+    let stack = [];
+
+    function quickSortStep() {
+      if (stack.length > 0) {
+        const { low, high } = stack.pop();
+
+        if (low < high) {
+          const pivotIndex = partition(low, high);
+          stack.push({ low, high: pivotIndex - 1 });
+          stack.push({ low: pivotIndex + 1, high });
+        }
+
+        setTimeout(() => {
+          quickSortStep();
+        }, 500);
+      }
+    }
+
+    stack.push({ low: 0, high: bars.length - 1 });
+    quickSortStep();
+  }
+
+  function partition(low, high) {
+    const pivot = bars[high].value;
+    let i = low - 1;
+
+    for (let j = low; j < high; j++) {
+      if (bars[j].value < pivot) {
+        i++;
+        const temp = bars[i].value;
+        bars[i].value = bars[j].value;
+        bars[j].value = temp;
+
+        setTimeout(() => {
+          updateBars();
+        }, i * 500);
+      }
+    }
+
+    const temp = bars[i + 1].value;
+    bars[i + 1].value = bars[high].value;
+    bars[high].value = temp;
+
+    setTimeout(() => {
+      updateBars();
+    }, (i + 1) * 500);
+
+    return i + 1;
+  }
+
+  function mergeSort() {
+    let aux = new Array(bars.length);
+
+    function mergeSortStep(low, high) {
+      if (low < high) {
+        const mid = Math.floor((low + high) / 2);
+        mergeSortStep(low, mid);
+        mergeSortStep(mid + 1, high);
+        merge(low, mid, high);
+      }
+    }
+
+    function merge(low, mid, high) {
+      for (let i = low; i <= high; i++) {
+        aux[i] = bars[i].value;
+      }
+
+      let i = low, j = mid + 1, k = low;
+
+      while (i <= mid && j <= high) {
+        if (aux[i] <= aux[j]) {
+          bars[k].value = aux[i];
+          setTimeout(() => {
+            updateBars();
+          }, k * 500);
+          i++;
+        } else {
+          bars[k].value = aux[j];
+          setTimeout(() => {
+            updateBars();
+          }, k * 500);
+          j++;
+        }
+        k++;
+      }
+
+      while (i <= mid) {
+        bars[k].value = aux[i];
+        setTimeout(() => {
+          updateBars();
+        }, k * 500);
+        i++;
+        k++;
+      }
+
+      while (j <= high) {
+        bars[k].value = aux[j];
+        setTimeout(() => {
+          updateBars();
+        }, k * 500);
+        j++;
+        k++;
+      }
+    }
+
+    mergeSortStep(0, bars.length - 1);
+  }
+
+  function shellSort() {
+    let n = bars.length;
+    for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+      for (let i = gap; i < n; i++) {
+        let temp = bars[i].value;
+        let j = i;
+
+        while (j >= gap && bars[j - gap].value > temp) {
+          bars[j].value = bars[j - gap].value;
+          bars[j].element.style.height = `${bars[j - gap].value * 3}px`;
+
+          setTimeout(() => {
+            updateBars();
+          }, j * 500);
+
+          j -= gap;
+        }
+
+        bars[j].value = temp;
+        bars[j].element.style.height = `${temp * 3}px`;
+
+        setTimeout(() => {
+          updateBars();
+        }, j * 500);
+      }
+    }
+  }
+
+  function changeSize() {
+    const newSize = parseInt(prompt('Enter new size for the array:'), 10);
+    if (!isNaN(newSize) && newSize > 0) {
+      const scaleFactor = newSize / bars.length;
+      bars.forEach((bar, index) => {
+        setTimeout(() => {
+          bar.value = Math.floor(bar.value * scaleFactor);
+          bar.element.style.height = `${bar.value * 3}px`;
+          updateBars();
+        }, index * 500);
+      });
+    }
+  }
+
+  createBars([90, 6, 56, 56, 82, 33, 16, 34, 41, 80, 10, 24, 74, 67, 27, 54, 49, 19, 1, 25, 98, 89, 26, 24, 3, 29, 78, 49, 99, 64, 82, 74, 8, 13, 73, 13, 10, 13, 85, 91, 45, 56, 75, 50, 5, 77, 15, 33, 12, 38]);
+</script>
+
+</body>
+</html>
